@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from subprocess import Popen
 import requests
@@ -6,7 +7,7 @@ from bs4 import BeautifulSoup
 
 
 COURSES_URL = "https://egghead.io/courses"
-BASE_COMMAND = "egghead-downloader -e {email} -p {password} {url} {output}"
+BASE_COMMAND = "egghead-downloader -f -e {email} -p {password} {url} {output}"
 
 
 def parse_courses(stack):
@@ -16,6 +17,7 @@ def parse_courses(stack):
     for course in courses:
         course_name = course.find('h3', 'course-title').text
         course_name = '-'.join(course_name.split())
+        course_name = re.sub(r"[():/\\|{}?<>'\"+=]", "", course_name)
         course_link = course.find('a', 'link-overlay').attrs['href']
         courses_dict[course_name] = course_link
     return courses_dict
@@ -24,7 +26,8 @@ def parse_courses(stack):
 def stack_name(stack):
     """ Return a stack name. """
     name = stack.find('h4', 'title').text
-    return '-'.join(name.split())
+    name = '-'.join(name.split())
+    return re.sub(r"[():/\\|{}?<>'\"+=]", "", name)
 
 
 def parse_courses_stack(stacks):
@@ -51,7 +54,8 @@ def create_dir(base_path, path=None):
         directory = os.path.join(os.getcwd(), 'egghead-courses', base_path)
     else:
         directory = os.path.join(base_path, path)
-    os.makedirs(directory)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     return directory
 
 
