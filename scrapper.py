@@ -4,10 +4,10 @@ import sys
 from subprocess import Popen
 import requests
 from bs4 import BeautifulSoup
-
+import time
 
 COURSES_URL = "https://egghead.io/courses"
-BASE_COMMAND = "egghead-downloader -f -e {email} -p {password} {url} {output}"
+BASE_COMMAND = "egghead-downloader -e {email} -p {password} {url} {output}"
 
 
 def parse_courses(stack):
@@ -68,6 +68,7 @@ def run_shells(stack_dir, courses, email, password):
                                                  password=password, output=course_dir)
         run_downloader = Popen(egghead_downloader, shell=True)
         running_shells.append(run_downloader)
+        time.sleep(5)
 
     for shell in running_shells:
         shell.wait()
